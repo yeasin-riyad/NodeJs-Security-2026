@@ -12,7 +12,9 @@ export function validateBody<T extends z.ZodTypeAny>(schema: T) {
       });
     }
 
-    req.body = result.data;
+    // req.body = result.data;
+
+    (req as any).validatedBody = result.data; //better to use new property instead of override req.body
     next();
   };
 }

@@ -27,7 +27,8 @@ const EXTRACT_SAFE_USER_SELECT_OPTIONS = "-password";
 
 router.post("/register", validateBody(registerSchema), async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    // const { name, email, password } = req.body;
+    const { name, email, password } = (req as any).validatedBody;
 
     const existingUser = await User.findOne({ email });
 
@@ -62,7 +63,8 @@ router.post("/register", validateBody(registerSchema), async (req, res) => {
 
 router.post("/login", validateBody(loginSchema), async (req, res) => {
   try {
-    const { email, password } = req.body;
+    // const { email, password } = req.body;
+    const { email, password } = (req as any).validatedBody;
 
     // only check with email which is correct
     const user = await User.findOne({ email });
