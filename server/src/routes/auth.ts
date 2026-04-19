@@ -75,29 +75,29 @@ router.post("/login", validateBody(loginSchema), async (req, res) => {
 
     // check if user acc locked
 
-    // if (isAccLocked(user)) {
-    //   return res.status(429).json({
-    //     message: "Too many login attempts. Please try again later",
-    //   });
-    // }
+    if (isAccLocked(user)) {
+      return res.status(429).json({
+        message: "Too many login attempts. Please try again later",
+      });
+    }
 
     const checkPassword = await bcrypt.compare(password, user.password);
 
     if (!checkPassword) {
-      // await registerFailedLoginAttemp(user);
+      await registerFailedLoginAttemp(user);
 
-      // if (isAccLocked(user)) {
-      //   return res.status(429).json({
-      //     message: "Too many login attempts. Please try again later",
-      //   });
-      // }
+      if (isAccLocked(user)) {
+        return res.status(429).json({
+          message: "Too many login attempts. Please try again later",
+        });
+      }
 
       return res.status(401).json({
         message: "Invalid email or password",
       });
     }
 
-    // await clearFailedLoginAttempts(user);
+    await clearFailedLoginAttempts(user);
 
     setAuthCookies(res, String(user._id), user.role);
     res.json({

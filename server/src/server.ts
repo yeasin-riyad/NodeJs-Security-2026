@@ -13,6 +13,7 @@ const app = express();
 
 app.disable("x-powered-by");
 
+//apiLimiter → general API protection
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
@@ -23,6 +24,8 @@ const apiLimiter = rateLimit({
   },
 });
 
+
+// authLimiter → specific protection for auth routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -33,7 +36,17 @@ const authLimiter = rateLimit({
   },
 });
 
-app.use(helmet());
+app.use(helmet());  //👉 helmet automatically তোমার app-এ অনেকগুলো security headers add করে
+                    //👉 এটা XSS, clickjacking, MIME sniffing, HSTS, etc. থেকে protection দেয়
+                    //👉 এটা attack surface কমায় এবং security improve করে
+                    //👉 helmet-এ অনেকগুলো middleware আছে, যেমন: contentSecurityPolicy, xPoweredBy, frameguard, etc.
+                    //👉 তুমি helmet-কে customize করতে পারো, যেমন: app.use(helmet({ contentSecurityPolicy: false })) যদি তুমি contentSecurityPolicy disable করতে চাও
+                    //⚠️ Important: Helmet সব security solve করে না, এটা শুধু headers level protection দেয়, তোমাকে এখনও লাগবে CSRF protection, validation, rate limiting, etc. তোমার app-এ security ensure করার জন্য।
+                   //🧠 সহজভাবে analogy 
+                        // 👉 Helmet =
+                        // motorcycle helmet 🪖
+                        // 👉 accident পুরো stop করে না
+                        // 👉 কিন্তু damage অনেক কমায় ✔️
 
 //allowlist
 // *
@@ -57,10 +70,10 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
-// app.use("/api", apiLimiter);
-// app.use("/api/auth/login", authLimiter);
-// app.use("/api/auth/register", authLimiter);
-// app.use("/api/auth/refresh", authLimiter);
+app.use("/api", apiLimiter);
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/register", authLimiter);
+app.use("/api/auth/refresh", authLimiter);
 
 
 app.get("/", (_req, res) => {
